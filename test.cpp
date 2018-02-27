@@ -12,7 +12,7 @@ using namespace std;
 string nomeTest = "kittens";
 string nomeFileInput = "input.txt";     //File da cui ottenere le info
 string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da dare a google
-int MAX_EQUALS_RESULT = 10;             //Numero massimo di punteggi uguali
+int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
 vector<int> v;                          //Struttura dati su cui salvare le info
 ofstream LOG;                           //File di log
 
@@ -24,6 +24,8 @@ int getRandomNumber(int);               //Funzione per ottenere un numero random
 int calculatePoints(int,int,int);       //Funzione per calcolare il punteggio di una soluzione
 
 int main(){
+    srand (time(NULL)); //Imposto il seme per la generazione di numeri random
+
     LOG = aperturaFileOutput("LOG_" + nomeTest);    //Apro il file di log per la scrittura
 
     ifstream input = aperturaFileInput(nomeFileInput);  //Apro il file di input per la lettura
@@ -60,7 +62,7 @@ int main(){
             cout << "Il punteggio è inferiore al massimo" << endl;
         }
         i++;
-        usleep(500000); //Sleep per il seme del random del prossimo tentativo
+        //usleep(500000); //Sleep per il seme del random del prossimo tentativo
     }
 
     return 0;
@@ -111,13 +113,12 @@ int calculatePoints(int a, int b, int c){ //Funzione che andrà modificata in ba
 
 int execute(int& maxPoints){
     int a,b,c;
-    srand (time(NULL)); //Imposto il seme per la generazione di numeri random
 
     //In questa parte genero la possibile soluzione del problema
     //***************************************
-    a = v.at(getRandomNumber(v.size() - 1));
-    b = v.at(getRandomNumber(v.size() - 1));
-    c = v.at(getRandomNumber(v.size() - 1));
+    a = v.at(getRandomNumber(v.size()));
+    b = v.at(getRandomNumber(v.size()));
+    c = v.at(getRandomNumber(v.size()));
     //***************************************
 
     int points = calculatePoints(a,b,c);    //Calcolo il punteggio dato dalla soluzione che ho trovato
