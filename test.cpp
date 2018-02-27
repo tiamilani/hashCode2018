@@ -44,7 +44,7 @@ int main(){
 
     while(counterEquals < MAX_EQUALS_RESULT){   //Continuo a fare tentativi finche il contatore dei risultati uguali al massimo non raggiunge il massimo settato
         LOG << "Tentativo -> " << i << endl;
-        cout << "Tentativo -> " << i << endl;
+        //cout << "Tentativo -> " << i << endl;
 
         int value = execute(maxPoints); //Ottengo il responso dalla funzione che genera il risultato
 
@@ -56,10 +56,10 @@ int main(){
         } else if(value == 0){  //Caso di punteggio uguale al massimo attuale
             counterEquals++;
             LOG << "Il punteggio è uguale al precedente " << counterEquals << endl;
-            cout << "Il punteggio è uguale al precedente " << counterEquals << endl;
+            //cout << "Il punteggio è uguale al precedente " << counterEquals << endl;
         } else {    //Caso di punteggio inferiore al massimo attuale
             LOG << "Il punteggio è inferiore al massimo" << endl;
-            cout << "Il punteggio è inferiore al massimo" << endl;
+            //cout << "Il punteggio è inferiore al massimo" << endl;
         }
         i++;
         //usleep(500000); //Sleep per il seme del random del prossimo tentativo
