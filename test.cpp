@@ -15,13 +15,14 @@ string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da da
 int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
 vector<int> v;                          //Struttura dati su cui salvare le info
 ofstream LOG;                           //File di log
+string nomeFileMaxPoints = "output";          //Nome del file con il punteggio massimo al termine dell'esecuzione
 
 ifstream aperturaFileInput(string);     //Funzione per aprire un file in lettura
 ofstream aperturaFileOutput(string);    //Funzione per aprire un file in scrittura
 void inserimentoOggetti(ifstream&);     //Funzione per inserire gli oggetti nella struttura dati
-int execute(int&);                      //Funzione che dalla struttura dati calcola il risultato e lo salva sul file da dare a google
+int execute(int,int&);                  //Funzione che dalla struttura dati calcola il risultato e lo salva sul file da dare a google
 int getRandomNumber(int);               //Funzione per ottenere un numero random
-int calculatePoints(int,int,int);       //Funzione per calcolare il punteggio di una soluzione
+int calculatePoints(string);            //Funzione per calcolare il punteggio di una soluzione
 
 int main(){
     srand (time(NULL)); //Imposto il seme per la generazione di numeri random
@@ -46,7 +47,7 @@ int main(){
         LOG << "Tentativo -> " << i << endl;
         //cout << "Tentativo -> " << i << endl;
 
-        int value = execute(maxPoints); //Ottengo il responso dalla funzione che genera il risultato
+        int value = execute(i,maxPoints); //Ottengo il responso dalla funzione che genera il risultato
 
         if(value == 1){ //Caso di nuovo punteggio massimo
             LOG << "Trovato nuovo punteggio massimo -> " << maxPoints << endl;
@@ -73,7 +74,8 @@ ifstream aperturaFileInput(string nomeFile){
     input.open(nomeFile);
 
     if(!input){
-        cout << "C'è stato un errore nell'apertura del file";
+        cout << "C'è stato un errore nell'apertura del file" << endl;
+        LOG << "C'è stato un errore nell'apertura del file" << endl;
     }
 
     return input;
@@ -84,7 +86,8 @@ ofstream aperturaFileOutput(string nomeFile){
     input.open(nomeFile);
 
     if(!input){
-        cout << "C'è stato un errore nell'apertura del file";
+        cout << "C'è stato un errore nell'apertura del file" << endl;
+        LOG << "C'è stato un errore nell'apertura del file" << endl;
     }
 
     return input;
@@ -107,11 +110,24 @@ int getRandomNumber(int MAX){   //Il numero random generato sarà tra 0 e MAX co
     return rand() % MAX;
 }
 
-int calculatePoints(int a, int b, int c){ //Funzione che andrà modificata in base a come andrà effettuato il calcolo del punteggio sul risultato
-    return a+b+c;
+int calculatePoints(string fileInput){ //Funzione che andrà modificata in base a come andrà effettuato il calcolo del punteggio sul risultato
+    int points;
+    ifstream input = aperturaFileInput(fileInput);
+    string line;
+    while (getline(input, line))    //Ottengo la linea
+    {
+        istringstream iss(line);
+        int a,b,c;  //Variabili su cui salverò il valore della linea
+        if (!(iss >> a >> b >> c)) {  //Per questa linea ottengo il valore richiesto, se la linea avesse due valori avrei potuto fare 'iss >> a >> b' in modo da salvare il primo su a ed il secondo su b
+            LOG << "ERROR" << endl;
+            break; //Errore
+        }
+        points = a+b+c;
+    }
+    return points;
 }
 
-int execute(int& maxPoints){
+string tentativoRandom(int nTentativo){
     int a,b,c;
 
     //In questa parte genero la possibile soluzione del problema
@@ -121,19 +137,59 @@ int execute(int& maxPoints){
     c = v.at(getRandomNumber(v.size()));
     //***************************************
 
-    int points = calculatePoints(a,b,c);    //Calcolo il punteggio dato dalla soluzione che ho trovato
+    //In questa parte scrivo la soluzione trovata su di un file di output secondo le specifiche fornite
+    //**************************************
+    string fileOutput = "output_" + to_string(nTentativo);
+    ofstream output = aperturaFileOutput(fileOutput);   //Apro il file contenente il risultato da dare poi a google
+    output << a << " " << b << " " << c << endl;    //Scrivo il risultato che andrà dato a google
+    output.close();
+    //**************************************
+
+    return fileOutput;
+}
+
+int execute(int nTentativo,int& maxPoints){
+
+    //****************PARTE 1****************
+    //Eseguo il tentativo random e ottengo il nome del file di output prodotto
+    string fileOutputTemporaneo = tentativoRandom(nTentativo);
+    //**********************************************
+
+    //***************PARTE 2*****************
+    //Calcolo il punteggio dato dal file di output generato randomicamente
+    int points = calculatePoints(fileOutputTemporaneo);    //Calcolo il punteggio dato dalla soluzione che ho trovato
+    //**************************************************
+
     LOG << "Punteggio trovato: " << points << endl;
 
+    //*****************PARTE 3******************
     //In questa parte confronto il punteggio con il massimo attuale
     if(points > maxPoints){ //Caso in cui io abbia trovato una soluzione migliore della precedente
         maxPoints = points; //Imposto il nuvo punteggio massimo attuale
-        ofstream output = aperturaFileOutput(nomeFileOutput);   //Apro il file contenente il risultato da dare poi a google
-        output << a << " " << b << " " << c << endl;    //Scrivo il risultato che andrà dato a google
-        output.close();
+
+        //Ho trovato un nuovo punteggio massimo, quindi elimino il file di output che dava il vecchio punteggio massimo
+        if( remove( nomeFileMaxPoints.c_str() ) != 0 )
+            LOG << "Error deleting file" << endl;
+        else
+            LOG << "File " << fileOutputTemporaneo << " successfully deleted" << endl;
+
+        //Sostituisco il nome del file di output che genera il punteggio massimo
+        nomeFileMaxPoints = fileOutputTemporaneo;
         return 1;
     } else if(points == maxPoints){ //Caso in cui il punteggio calcolato sia uguale al massimo attuale
+        //Dando lo stesso punteggio elimino il file generato randomicamente in questo tentativo
+        if( remove( fileOutputTemporaneo.c_str() ) != 0 )
+            LOG << "Error deleting file" << endl;
+        else
+            LOG << "File " << fileOutputTemporaneo << " successfully deleted" << endl;
         return 0;
     } else {    //Caso in cui il punteggio calcolato sia inferiore al precedente
+        //Punteggio inferiore al massimo, elimino il file generato in questo tentativo
+        if( remove( fileOutputTemporaneo.c_str() ) != 0 )
+            LOG << "Error deleting file" << endl;
+        else
+            LOG << "File " << fileOutputTemporaneo << " successfully deleted" << endl;
         return -1;
     }
+    //*****************************************
 }
