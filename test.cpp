@@ -36,6 +36,8 @@ struct car{
     bool available;
 };
 
+vector<car> listaMacchine;
+
 void inserimentoOggetti(ifstream*);     //Funzione per inserire gli oggetti nella struttura dati
 
 ifstream aperturaFileInput(string);     //Funzione per aprire un file in lettura
@@ -77,6 +79,18 @@ int main(){
     cout << R << C << F << N << B << T << endl;
     for(int j=0; j < listaRotte.size(); j++){
         cout << listaRotte.at(j).a << listaRotte.at(j).b<< listaRotte.at(j).x<< listaRotte.at(j).y<< listaRotte.at(j).s << listaRotte.at(j).f << endl;
+    }
+
+    i=0;
+    while(i<F){
+        car tmp;
+        tmp.x = 0;
+        tmp.y = 0;
+        tmp.step = 0;
+        tmp.best = 0;
+        tmp.available = false;
+        listaMacchine.push_back(tmp);
+        i++;
     }
 
     /*
