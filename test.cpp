@@ -10,7 +10,7 @@
 using namespace std;
 
 string nomeTest = "kittens";
-string nomeFileinput = "input.txt";     //File da cui ottenere le info
+string nomeFileinput = "a_example.in";     //File da cui ottenere le info
 string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da dare a google
 int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
 vector<int> v;
@@ -56,16 +56,30 @@ int main(){
     LOG << "File di (*input) aperto" << endl;
 
     string line;
-    while (getline(input, line))    //Ottengo la linea
+    getline(input, line);
+    istringstream iss(line);
+
+    iss >> R >> C >> F >> N >> B >> T;
+    int i=0;
+    while (getline(input, line))
     {
         istringstream iss(line);
-        int a;  //Variabile su cui salverò il valore della linea
-        if (!(iss >> a)) {  //Per questa linea ottengo il valore richiesto, se la linea avesse due valori avrei potuto fare 'iss >> a >> b' in modo da salvare il primo su a ed il secondo su b
+        rotta tmp;
+        if (!(iss >> tmp.a >> tmp.b >> tmp.x >> tmp.y >> tmp.s >> tmp.f)) {  //Per questa linea ottengo il valore richiesto, se la linea avesse due valori avrei potuto fare 'iss >> a >> b' in modo da salvare il primo su a ed il secondo su b
             break; //Errore
         }
-        v.push_back(a); //Inserisco il valore ottenuto nella struttura dati
+        tmp.indice = i;
+        tmp.assegnata = false;
+        i++;
+        listaRotte.push_back(tmp); //Inserisco il valore ottenuto nella struttura dati
     }
 
+    cout << R << C << F << N << B << T << endl;
+    for(int j=0; j < listaRotte.size(); j++){
+        cout << listaRotte.at(j).a << listaRotte.at(j).b<< listaRotte.at(j).x<< listaRotte.at(j).y<< listaRotte.at(j).s << listaRotte.at(j).f << endl;
+    }
+
+    /*
     LOG << "Oggetti inseriti nella struttura dati" << endl;
 
     input.close();  //Chiudo il file di (*input) non più necessario
@@ -96,7 +110,7 @@ int main(){
         i++;
         //usleep(500000); //Sleep per il seme del random del prossimo tentativo
     }
-
+    */
     return 0;
 }
 
