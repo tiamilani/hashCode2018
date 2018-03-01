@@ -10,16 +10,14 @@
 using namespace std;
 
 string nomeTest = "kittens";
-string nomeFileInput = "input.txt";     //File da cui ottenere le info
+string nomeFileinput = "input.txt";     //File da cui ottenere le info
 string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da dare a google
 int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
 vector<int> v;                          //Struttura dati su cui salvare le info
 ofstream LOG;                           //File di log
 string nomeFileMaxPoints = "output";          //Nome del file con il punteggio massimo al termine dell'esecuzione
 
-ifstream aperturaFileInput(string);     //Funzione per aprire un file in lettura
-ofstream aperturaFileOutput(string);    //Funzione per aprire un file in scrittura
-void inserimentoOggetti(ifstream&);     //Funzione per inserire gli oggetti nella struttura dati
+void inserimentoOggetti(ifstream*);     //Funzione per inserire gli oggetti nella struttura dati
 int execute(int,int&);                  //Funzione che dalla struttura dati calcola il risultato e lo salva sul file da dare a google
 int getRandomNumber(int);               //Funzione per ottenere un numero random
 int calculatePoints(string);            //Funzione per calcolare il punteggio di una soluzione
@@ -27,17 +25,27 @@ int calculatePoints(string);            //Funzione per calcolare il punteggio di
 int main(){
     srand (time(NULL)); //Imposto il seme per la generazione di numeri random
 
-    LOG = aperturaFileOutput("LOG_" + nomeTest);    //Apro il file di log per la scrittura
+    LOG.open("LOG_" + nomeTest);    //Apro il file di log per la scrittura
 
-    ifstream input = aperturaFileInput(nomeFileInput);  //Apro il file di input per la lettura
+    ifstream input;
+    input.open(nomeFileinput);  //Apro il file di (*input) per la lettura
 
-    LOG << "File di input aperto" << endl;
+    LOG << "File di (*input) aperto" << endl;
 
-    inserimentoOggetti(input);  //Inserisco gli oggetti dal file di input alla struttura dati
+    string line;
+    while (getline(input, line))    //Ottengo la linea
+    {
+        istringstream iss(line);
+        int a;  //Variabile su cui salverò il valore della linea
+        if (!(iss >> a)) {  //Per questa linea ottengo il valore richiesto, se la linea avesse due valori avrei potuto fare 'iss >> a >> b' in modo da salvare il primo su a ed il secondo su b
+            break; //Errore
+        }
+        v.push_back(a); //Inserisco il valore ottenuto nella struttura dati
+    }
 
     LOG << "Oggetti inseriti nella struttura dati" << endl;
 
-    input.close();  //Chiudo il file di input non più necessario
+    input.close();  //Chiudo il file di (*input) non più necessario
 
     int maxPoints = 0;      //Massimo punteggio ottenuto fino ad ora
     int counterEquals = 0;  //Contatore di quante volte ottengo un determinato punteggio massimo
@@ -69,33 +77,9 @@ int main(){
     return 0;
 }
 
-ifstream aperturaFileInput(string nomeFile){
-    ifstream input;
-    input.open(nomeFile);
-
-    if(!input){
-        cout << "C'è stato un errore nell'apertura del file" << endl;
-        LOG << "C'è stato un errore nell'apertura del file" << endl;
-    }
-
-    return input;
-}
-
-ofstream aperturaFileOutput(string nomeFile){
-    ofstream input;
-    input.open(nomeFile);
-
-    if(!input){
-        cout << "C'è stato un errore nell'apertura del file" << endl;
-        LOG << "C'è stato un errore nell'apertura del file" << endl;
-    }
-
-    return input;
-}
-
-void inserimentoOggetti(ifstream& input){ //Funzione che andrà modificata in base alla struttura del file di input
+void inserimentoOggetti(ifstream* input){ //Funzione che andrà modificata in base alla struttura del file di (*input)
     string line;
-    while (getline(input, line))    //Ottengo la linea
+    while (getline((*input), line))    //Ottengo la linea
     {
         istringstream iss(line);
         int a;  //Variabile su cui salverò il valore della linea
@@ -110,9 +94,11 @@ int getRandomNumber(int MAX){   //Il numero random generato sarà tra 0 e MAX co
     return rand() % MAX;
 }
 
-int calculatePoints(string fileInput){ //Funzione che andrà modificata in base a come andrà effettuato il calcolo del punteggio sul risultato
+int calculatePoints(string fileinput){ //Funzione che andrà modificata in base a come andrà effettuato il calcolo del punteggio sul risultato
     int points;
-    ifstream input = aperturaFileInput(fileInput);
+    ifstream input;
+    input.open(fileinput);
+
     string line;
     while (getline(input, line))    //Ottengo la linea
     {
@@ -140,7 +126,8 @@ string tentativoRandom(int nTentativo){
     //In questa parte scrivo la soluzione trovata su di un file di output secondo le specifiche fornite
     //**************************************
     string fileOutput = "output_" + to_string(nTentativo);
-    ofstream output = aperturaFileOutput(fileOutput);   //Apro il file contenente il risultato da dare poi a google
+    ofstream output;
+    output.open(fileOutput);   //Apro il file contenente il risultato da dare poi a google
     output << a << " " << b << " " << c << endl;    //Scrivo il risultato che andrà dato a google
     output.close();
     //**************************************
@@ -181,7 +168,7 @@ int execute(int nTentativo,int& maxPoints){
         if( remove( fileOutputTemporaneo.c_str() ) != 0 )
             LOG << "Error deleting file" << endl;
         else
-            LOG << "File " << fileOutputTemporaneo << " successfully deleted" << endl;
+        LOG << "File " << fileOutputTemporaneo << " successfully deleted" << endl;
         return 0;
     } else {    //Caso in cui il punteggio calcolato sia inferiore al precedente
         //Punteggio inferiore al massimo, elimino il file generato in questo tentativo
