@@ -13,11 +13,34 @@ string nomeTest = "kittens";
 string nomeFileinput = "input.txt";     //File da cui ottenere le info
 string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da dare a google
 int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
-vector<int> v;                          //Struttura dati su cui salvare le info
+vector<int> v;
 ofstream LOG;                           //File di log
 string nomeFileMaxPoints = "output";          //Nome del file con il punteggio massimo al termine dell'esecuzione
 
+int R,C,F,N,B,T;
+
+struct rotta{
+    int a,b,x,y,s;
+    long int f;
+    int indice;
+    bool assegnata;
+};
+
+vector<rotta> listaRotte;
+
+struct car{
+    int x,y;
+    long int step;
+    vector<int> rotteFatte;
+    double best;
+    bool available;
+};
+
 void inserimentoOggetti(ifstream*);     //Funzione per inserire gli oggetti nella struttura dati
+
+ifstream aperturaFileInput(string);     //Funzione per aprire un file in lettura
+ofstream aperturaFileOutput(string);    //Funzione per aprire un file in scrittura
+void inserimentoOggetti(ifstream&);     //Funzione per inserire gli oggetti nella struttura dati
 int execute(int,int&);                  //Funzione che dalla struttura dati calcola il risultato e lo salva sul file da dare a google
 int getRandomNumber(int);               //Funzione per ottenere un numero random
 int calculatePoints(string);            //Funzione per calcolare il punteggio di una soluzione
@@ -82,7 +105,8 @@ void inserimentoOggetti(ifstream* input){ //Funzione che andrà modificata in ba
     while (getline((*input), line))    //Ottengo la linea
     {
         istringstream iss(line);
-        int a;  //Variabile su cui salverò il valore della linea
+        int a;
+
         if (!(iss >> a)) {  //Per questa linea ottengo il valore richiesto, se la linea avesse due valori avrei potuto fare 'iss >> a >> b' in modo da salvare il primo su a ed il secondo su b
             break; //Errore
         }
