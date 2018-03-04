@@ -10,7 +10,7 @@
 using namespace std;
 
 string nomeTest = "kittens";
-string nomeFileinput = "a_example.in";     //File da cui ottenere le info
+string nomeFileinput = "e_high_bonus.in";     //File da cui ottenere le info
 string nomeFileOutput = "output.txt";   //File su cui salvare il risultato da dare a google
 int MAX_EQUALS_RESULT = 20;             //Numero massimo di punteggi uguali
 vector<int> v;
@@ -76,9 +76,9 @@ int main(){
         listaRotte.push_back(tmp); //Inserisco il valore ottenuto nella struttura dati
     }
 
-    cout << R << C << F << N << B << T << endl;
+    //cout << R << C << F << N << B << T << endl;
     for(int j=0; j < listaRotte.size(); j++){
-        cout << listaRotte.at(j).a << listaRotte.at(j).b<< listaRotte.at(j).x<< listaRotte.at(j).y<< listaRotte.at(j).s << listaRotte.at(j).f << endl;
+        //cout << listaRotte.at(j).a << listaRotte.at(j).b<< listaRotte.at(j).x<< listaRotte.at(j).y<< listaRotte.at(j).s << listaRotte.at(j).f << endl;
     }
 
     i=0;
@@ -88,11 +88,120 @@ int main(){
         tmp.y = 0;
         tmp.step = 0;
         tmp.best = 0;
-        tmp.available = false;
+        tmp.available = true;
         listaMacchine.push_back(tmp);
         i++;
     }
 
+    for(int j=0;j<listaMacchine.size();j++){
+        //cout<<"["<< listaMacchine.at(j).x << listaMacchine.at(j).y << "]"<<endl;
+    }
+
+    int macchineOccupate = 0;
+    int rotteAssegnate = 0;
+    int nMacchina = F-1;
+    int MAXROUTE = 85;
+    while(nMacchina >= 0){
+        rotteAssegnate = 0;
+        int tempoDiLiberazioneMinimo = -1;
+        long int tempo = 0;
+        while(tempo<T && rotteAssegnate<MAXROUTE){
+            //cout << "Tempo liberazione = " << tempoDiLiberazioneMinimo << endl;
+            if(tempoDiLiberazioneMinimo != -1){
+                tempo+=tempoDiLiberazioneMinimo;
+                tempoDiLiberazioneMinimo=-1;
+                //cout << "Ho trovato tutte le macchine occuote passo al tempo: " << tempo << endl;
+            }
+            //cout << endl << "Tempo attuale: " << tempo << endl;
+            if(listaMacchine.at(nMacchina).available){
+                //cout << "Considero la macchina " << nMacchina << endl;
+                int indexBestRotta;
+                int TempoTotale;
+                int bestTempoTotale;
+                int nRotta = 0;
+                bool rottaTrovata = false;
+                while(nRotta<N){
+                    //cout << "Considero la rotta: " << nRotta << endl;
+                    if(!listaRotte.at(nRotta).assegnata){
+                        //cout << "La rotta non è stata assegnata" << endl;
+                        int TempoArrivo = abs(listaMacchine.at(nMacchina).x - listaRotte.at(nRotta).a) + abs(listaMacchine.at(nMacchina).y - listaRotte.at(nRotta).b);
+                        int TempoAttesa = listaRotte.at(nRotta).s - (tempo + TempoArrivo);
+                        if(TempoAttesa < 0){
+                            TempoAttesa = 0;
+                        }
+                        int TempoTrasporto = abs(listaRotte.at(nRotta).a - listaRotte.at(nRotta).x) + abs(listaRotte.at(nRotta).b - listaRotte.at(nRotta).y);
+                        TempoTotale = TempoArrivo + TempoAttesa + TempoTrasporto;
+                        //cout << "TempoArrivo: " << TempoArrivo << "\tTempoAttesa: " << TempoAttesa << "\tTempoTrasporto: " << TempoTrasporto << endl;
+                        //cout << "Tempo toale per macchina " << nMacchina << " per rotta " << nRotta << " = " << TempoTotale << endl;
+                        if(listaMacchine.at(nMacchina).step + TempoTotale <= listaRotte.at(nRotta).f){
+                            double ipotesi;
+                            if(TempoArrivo <= listaRotte.at(nRotta).s){
+                                ipotesi = (double)TempoTotale/(TempoTrasporto+B);
+                            } else {
+                                ipotesi = (double)TempoTotale/TempoTrasporto;
+                            }
+                            //cout << "Ipotesi per macchina " << nMacchina << " per rotta " << nRotta << " = " << ipotesi << endl;
+
+                            if(listaMacchine.at(nMacchina).best == 0){
+                                //cout << "Ho trovato best a 0" << endl;
+                                listaMacchine.at(nMacchina).best = ipotesi;
+                                indexBestRotta = nRotta;
+                                bestTempoTotale = TempoTotale;
+                                rottaTrovata = true;
+                            } else if(listaMacchine.at(nMacchina).best > ipotesi){
+                                listaMacchine.at(nMacchina).best = ipotesi;
+                                indexBestRotta = nRotta;
+                                bestTempoTotale = TempoTotale;
+                                rottaTrovata = true;
+                            }
+                        }
+                    }
+                    nRotta++;
+                    ////cout << "Ho analizzato la rotta" << nRotta << endl;
+                }
+                if(rottaTrovata){
+                    //cout << "é stata trovata una rotta? " << rottaTrovata << endl;
+                    listaMacchine.at(nMacchina).step += bestTempoTotale;
+                    //cout << "La macchina sarà ferma fino a: " << listaMacchine.at(nMacchina).step << endl;
+                    listaMacchine.at(nMacchina).available = false;
+                    listaRotte.at(indexBestRotta).assegnata = true;
+                    //cout << "La rotta " << indexBestRotta << "attualmente è assegnata: " << listaRotte.at(indexBestRotta).assegnata << endl;
+                    listaMacchine.at(nMacchina).rotteFatte.push_back(indexBestRotta);
+                    //cout << "Assegno rotta: " << indexBestRotta << "Alla macchina: " << nMacchina << endl;
+                    rotteAssegnate++;
+                    macchineOccupate++;
+                    if(tempoDiLiberazioneMinimo == -1 || tempoDiLiberazioneMinimo > TempoTotale){
+                        tempoDiLiberazioneMinimo = bestTempoTotale;
+                    }
+                } else {
+                    break;
+                }
+            }
+            else{
+                if(listaMacchine.at(nMacchina).step == tempo){
+                    listaMacchine.at(nMacchina).available = true;
+                    macchineOccupate--;
+                    listaMacchine.at(nMacchina).best = 0;
+                    //cout << "Tempo: " << tempo << " Libero la macchina " << nMacchina << endl;
+                    tempo--;
+                }
+            }
+            if(tempoDiLiberazioneMinimo != -1)
+                tempoDiLiberazioneMinimo--;
+            tempo++;
+        }
+        nMacchina--;
+    }
+
+    ofstream output;
+    output.open(nomeFileinput + "Output.txt");  //Apro il file di (*input) per la lettura
+    for(int k = 0; k < F; k++){
+        output << listaMacchine.at(k).rotteFatte.size() << " ";
+        for(int p = 0; p < listaMacchine.at(k).rotteFatte.size(); p++){
+            output << listaMacchine.at(k).rotteFatte.at(p) << " ";
+        }
+        output << endl;
+    }
     /*
     LOG << "Oggetti inseriti nella struttura dati" << endl;
 
@@ -104,22 +213,22 @@ int main(){
 
     while(counterEquals < MAX_EQUALS_RESULT){   //Continuo a fare tentativi finche il contatore dei risultati uguali al massimo non raggiunge il massimo settato
         LOG << "Tentativo -> " << i << endl;
-        //cout << "Tentativo -> " << i << endl;
+        ////cout << "Tentativo -> " << i << endl;
 
         int value = execute(i,maxPoints); //Ottengo il responso dalla funzione che genera il risultato
 
         if(value == 1){ //Caso di nuovo punteggio massimo
             LOG << "Trovato nuovo punteggio massimo -> " << maxPoints << endl;
-            cout << "Trovato nuovo punteggio massimo -> " << maxPoints << endl;
+            //cout << "Trovato nuovo punteggio massimo -> " << maxPoints << endl;
             counterEquals = 0;  //Resetto il contatore per farlo ricominciare
             MAX_EQUALS_RESULT--;    //Dato che ottenre un punteggio sempre più elevato è più difficile, diminuisco il massimo di punteggi uguali da ottenere per considerare concluso il test
         } else if(value == 0){  //Caso di punteggio uguale al massimo attuale
             counterEquals++;
             LOG << "Il punteggio è uguale al precedente " << counterEquals << endl;
-            //cout << "Il punteggio è uguale al precedente " << counterEquals << endl;
+            ////cout << "Il punteggio è uguale al precedente " << counterEquals << endl;
         } else {    //Caso di punteggio inferiore al massimo attuale
             LOG << "Il punteggio è inferiore al massimo" << endl;
-            //cout << "Il punteggio è inferiore al massimo" << endl;
+            ////cout << "Il punteggio è inferiore al massimo" << endl;
         }
         i++;
         //usleep(500000); //Sleep per il seme del random del prossimo tentativo
